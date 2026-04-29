@@ -7,8 +7,7 @@ An AI-powered pet care scheduling assistant that combines priority-based plannin
 ---
 
 ## Demo Walkthrough
-
-> **Loom video:** _[Link to be added before submission]_
+**Demo video:** ![PawPal Demo Video](https://youtu.be/Bzup29V632Y)
 
 ---
 
@@ -35,7 +34,7 @@ The system has three layers:
 2. **AI Advisor** (`ai_advisor.py`) — sends a structured prompt to the AI model, parses the JSON response, validates each suggested task, and returns a confidence score.
 3. **Streamlit UI** (`app.py`) — ties both layers together. Users can get AI suggestions, add them to the task list with one click, then run the core scheduler to generate a final plan.
 
-A diagram image is also saved at [assets/architecture_diagram.png](assets/architecture_diagram.png).
+A `.png` copy of the diagram is also saved at [assets/architecture_diagram.png](assets/architecture_diagram.png).
 
 ---
 
