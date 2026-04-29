@@ -1,6 +1,7 @@
 import streamlit as st
 from datetime import date
 from pawpal_system import Owner, Pet, Task, Schedule, sort_tasks_by_time, detect_conflicts
+from ai_advisor import suggest_tasks
 
 st.set_page_config(page_title="PawPal+", page_icon="🐾", layout="centered")
 st.title("🐾 PawPal+")
@@ -19,6 +20,8 @@ if "pet" not in st.session_state:
     st.session_state.pet = None
 if "schedule" not in st.session_state:
     st.session_state.schedule = None
+if "ai_result" not in st.session_state:
+    st.session_state.ai_result = None
 
 # ---------------------------------------------------------------------------
 # Section 1: Owner & Pet Setup
@@ -39,10 +42,10 @@ if st.button("Save Owner & Pet"):
     owner = Owner(name=owner_name, available_time=int(available_time))
     owner.add_pet(pet)
 
-    # Store in the session vault — these persist across all reruns
     st.session_state.owner = owner
     st.session_state.pet = pet
-    st.session_state.schedule = None   # reset any old schedule
+    st.session_state.schedule = None
+    st.session_state.ai_result = None
     st.success(f"Saved! Owner: {owner_name} | Pet: {pet_name} ({species}, age {pet_age})")
 
 # Don't render the rest of the app until setup is complete
@@ -91,7 +94,45 @@ if pet_tasks:
         ]
     )
 else:
-    st.info("No tasks yet. Add one above.")
+    st.info("No tasks yet. Add one above or use AI suggestions below.")
+
+# ---------------------------------------------------------------------------
+# Section 2b: AI Task Suggestions
+# ---------------------------------------------------------------------------
+st.markdown("##### AI Task Suggestions")
+st.caption("Let Claude suggest appropriate daily tasks based on your pet's species and age.")
+
+if st.button("Get AI Suggestions"):
+    with st.spinner("Asking Claude for task ideas..."):
+        result = suggest_tasks(
+            pet_name=st.session_state.pet.name,
+            species=st.session_state.pet.species,
+            age=st.session_state.pet.age,
+        )
+    st.session_state.ai_result = result
+
+if st.session_state.ai_result:
+    result = st.session_state.ai_result
+    if result["success"]:
+        confidence_pct = int(result["confidence"] * 100)
+        st.caption(f"Confidence score: {confidence_pct}% ({len(result['tasks'])} suggestions)")
+        for i, t in enumerate(result["tasks"]):
+            cols = st.columns([3, 1, 1, 1, 1])
+            cols[0].write(f"**{t['name']}**")
+            cols[1].write(f"{t['duration']} min")
+            cols[2].write(t["priority"])
+            cols[3].write(t["category"])
+            if cols[4].button("Add", key=f"ai_add_{i}"):
+                new_task = Task(
+                    name=t["name"],
+                    duration=t["duration"],
+                    priority=t["priority"],
+                    category=t["category"],
+                )
+                st.session_state.pet.add_task(new_task)
+                st.rerun()
+    else:
+        st.error(f"Could not get suggestions: {result['error']}")
 
 st.divider()
 

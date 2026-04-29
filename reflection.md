@@ -83,19 +83,16 @@ Early in the project, Claude suggested adding a separate `ScheduledTask` class t
 - What behaviors did you test?
 - Why were these tests important?
 
-The test suite covers five behaviors: chronological sorting, unscheduled task
-ordering, daily recurrence via `Task.mark_complete()` directly, daily recurrence
-via `Pet.complete_task()` (the higher-level path), conflict detection on
-overlapping tasks, and a no-false-positives check for back-to-back tasks.
+I tested five behaviors: chronological sorting, unscheduled task ordering, daily recurrence via `Task.mark_complete()` directly, daily recurrence via `Pet.complete_task()` (the higher-level path), conflict detection on overlapping tasks, and a no-false-positives check for back-to-back tasks.
 
-These tests were important because they target the three places the system can silently produce wrong output — a schedule that's out of order, a recurring task that doesn't regenerate, or a conflict that goes undetected. Unlike a crash or exception, those failures would just show the user incorrect data with no error message. If the user is expecting to see ordered output from the application, for example, this incorrect output would be very obvious to the user, as well.
+These tests mattered because they target the three places the system can silently produce wrong output — a schedule that's out of order, a recurring task that doesn't regenerate, or a conflict that goes undetected. Unlike a crash, those failures would just show incorrect data with no error message, which would be immediately obvious to anyone expecting ordered output.
 
 **b. Confidence**
 
 - How confident are you that your scheduler works correctly?
 - What edge cases would you test next if you had more time?
 
-As I mentioned in the README, I would give a 4 out of 5 confidence rating for the scheduler. The core logic is well-covered with tests: every major function has at least one positive case and one edge case. We also added multiple tests for the sorting and filtering algorithms we implemented. If I had more time, I would probably test the `build_owner_schedules` integration path (owner → pets → schedules in one call),
+As I mentioned in the README, I would give a 4 out of 5 confidence rating for the scheduler. The core logic is well-covered with tests: every major function has at least one positive case and one edge case. I also added multiple tests for the sorting and filtering algorithms I implemented. If I had more time, I would probably test the `build_owner_schedules` integration path (owner → pets → schedules in one call),
 weekly recurrence (only daily is tested), and `generate_plan`'s time-budget enforcement — verifying that a task which doesn't fit is actually dropped. Those aren't risky omissions for this scale of project, but they're the natural next tests to write.
 ---
 
